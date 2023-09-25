@@ -1,0 +1,3 @@
+Write an application in C that supports encoding and decoding Morse code cipher 
+Requirements: Trainees must use binary tree data structure for encoding, and decoding.
+References: https://drive.google.com/drive/folders/1R0IZjQ6SufA-IhSPpYW52mF1qq0bUK_D
