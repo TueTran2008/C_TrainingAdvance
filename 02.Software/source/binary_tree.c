@@ -8,8 +8,11 @@
 /******************************************************************************
  *                              DEFINE AND TYPEDEF 
 ******************************************************************************/
-
-#define DEBUG_ENABLE 1
+#if(DEBUG_BINARY_TREE)
+#define DEBUG_BT(format_, ...)  printf(format_, ##__VA_ARGS__)
+#else
+#define DEBUG_BT(format_, ...) (void)(0)
+#endif
 /******************************************************************************
  *                              PRIVATE VARIABLES
 ******************************************************************************/
@@ -25,17 +28,6 @@
 /******************************************************************************
  *                              PRIVATE FUNCTIONS
 ******************************************************************************/
-void bt_print_in_order(bt_node* node)
-{
-    if (node == NULL)
-        return;
-    // First recur on left child
-    bt_print_in_order(node->left);
-    // Then print the data of node
-    printf("%d ", node->data);
-    // Now recur on right child
-    bt_print_in_order(node->right);
-}
 /******************************************************************************
  *                              GLOBAL FUNCTIONS
 ******************************************************************************/
@@ -44,7 +36,7 @@ bt_node* bt_new_nodes(int data)
     bt_node* node = (bt_node*)malloc(sizeof(bt_node));
     if(node == NULL)
     {
-        printf("%s: Cannot create new node\r\n", __FUNCTION__);
+        DEBUG_BT("%s: Cannot create new node\r\n", __FUNCTION__);
         return NULL;
     }
     else
@@ -52,9 +44,21 @@ bt_node* bt_new_nodes(int data)
         node->data = data;
         node->left = NULL;
         node->right = NULL;
-        printf("Create node %c\r\n", data);
+        DEBUG_BT("Create node %c\r\n", data);
     }
     return node;
 }
+void bt_delete_tree(bt_node* node) 
+{
+    if (node == NULL) return;
+
+    /* first delete both subtrees */
+    bt_delete_tree(node->left);
+    bt_delete_tree(node->right);
+  
+    /* then delete the node */
+    DEBUG_BT("\n Deleting node: %d", node->data);
+    free(node);
+} 
 
  
