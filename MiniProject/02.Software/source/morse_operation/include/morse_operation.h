@@ -16,7 +16,7 @@ typedef enum
 }morse_operation_t;
 
 
-#define DEBUG_MORSE_ENABLE 1
+#define DEBUG_MORSE_ENABLE 0
 #define MORSE_SPACE_LENGTH_BETWEEN_LETTERS  1
 #define MORSE_SPACE_LENGTH_BETWEEN_WORDS    7
 /******************************************************************************
