@@ -13,10 +13,11 @@
  * @param[in] input_string Pointer to data to be converte
  * @param[in] output_file Pointer to output directory
  * @param[in] string_len length of input text to be convert
+ * @return 1 if encode fail
+ *         0 if encode sucessfully
  */
-static void encode(char* input_string, char *output_file, size_t string_len)
+static int encode(char* input_string, char *output_file, size_t string_len)
 {
-    printf("File encode function\r\n");
     char *rd_buf = (char*)malloc(string_len * 6);
     int len = 0;
     /*In case of encoding -> output length is bigger than the original ->about 6 time bigger*/
@@ -25,7 +26,6 @@ static void encode(char* input_string, char *output_file, size_t string_len)
         input_string[i] = toupper(input_string[i]);
         if (input_string[i] >= 65 && input_string[i] <= 90) /*Upper letter case*/
         {
-            printf("%c\r\n", input_string[i]);
             len += morse_encode_character(input_string[i], rd_buf + len);
             len += sprintf(rd_buf + len, "%s", " "); /*Add a space between letter*/
         }
@@ -36,11 +36,12 @@ static void encode(char* input_string, char *output_file, size_t string_len)
         else
         {
             printf("Character with hex value: 0x%02x - index: %d is not a value of Morse code uppercase Alphabet \r\n-> Please correct the input\r\n", input_string[i], i);
-            exit(0);
+            return 1;
         }
     }
     file_handle_write(output_file, rd_buf);
     free(rd_buf);
+    return 0;
 }
 /**
  * @brief Decode a text string to Morse code and write to a file
@@ -48,19 +49,19 @@ static void encode(char* input_string, char *output_file, size_t string_len)
  * @param[in] input_string Pointer to data to be converte
  * @param[in] output_file Pointer to output directory
  * @param[in] string_len length of input text to be convert
+ * @return 1 if decode fail
+ *         0 if decode successfully
  */
-static void decode(char* input_string, char* output_file, size_t string_len)
+static int decode(char* input_string, char* output_file, size_t string_len)
 {
     /*In case of decoding -> output length is smaller than the orignial ->*/
-    printf("File decode function\r\n");
     char *rd_buf = (char*)malloc(string_len);
     char temp_buf[8];
     char temp_index = 0;
     int len = 0;
-    
     bool is_space_between_letter = false;
     bool is_space_between_words = false;
-    //bool is_end_of_string = false;
+
     memset(temp_buf, 0, sizeof(temp_buf));
     /*Find the space*/
     for (unsigned int i = 0; i < string_len; i++)
@@ -87,21 +88,15 @@ static void decode(char* input_string, char* output_file, size_t string_len)
         }
         if (is_space_between_words || is_space_between_letter)
         {
-            printf("buffer :%s\r\n", temp_buf);
             char a = morse_decode_character(temp_buf, temp_index);
             if(a == -1)
             {
                 printf("Cannot decode the value -> Input is not a Encoded Morse code");
-                exit(0);
-            }
-            else
-            {
-                printf("Decode character: %c\r\n", a);
+                return 1;
             }
             temp_index = 0;
             memset(temp_buf, 0, sizeof(temp_buf));
             len += sprintf(rd_buf + len, "%c", a);
-            printf("rd buff:%s\r\n", rd_buf);
             if(is_space_between_words)
             {
                 len += sprintf(rd_buf + len, " ");
@@ -110,9 +105,9 @@ static void decode(char* input_string, char* output_file, size_t string_len)
             is_space_between_letter = false;
         }
     }
-    
     file_handle_write(output_file, rd_buf);
     free(rd_buf);
+    return 0;
 }
 
 int main(int argc, char *argv[])
@@ -165,12 +160,17 @@ int main(int argc, char *argv[])
     file_handle_read(argv[2], buf_rd);
     if (morse_operation == MORSE_OPERATION_ENCODING)
     {
-        encode(buf_rd, argv[3], file_size);
+        err = encode(buf_rd, argv[3], file_size);
     }
     else if (morse_operation == MORSE_OPERATION_DECODING)
     {
-        decode(buf_rd, argv[3], file_size);
+        err = decode(buf_rd, argv[3], file_size);
     }
+    if(err)
+    {
+        printf("Error while encode or decode -> Please check your input\r\n");    
+    }
+    free(buf_rd);
     morse_clean();
     return 0;
 }
