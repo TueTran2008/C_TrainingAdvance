@@ -49,7 +49,7 @@ int file_handle_check_file_exist(const char file_name[]);
  */
 int file_handle_get_current_directory(char *p_out);
 /**
- * @brief Check if directory exists
+ * @brief Check if directory existsMAX_FILE_SIZE
  * 
  * @param[out] path Pointer to directory string
  * @return TRUE if directory exist

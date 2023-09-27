@@ -166,12 +166,12 @@ char morse_decode_character(char* input, size_t input_size)
     if (m_root == NULL)
     {
         DEBUG_MORSE("%s: Morse operation hasn't initialized yet\r\n", __FUNCTION__);
-        return 1;
+        return -1;
     }
     if (input == NULL || input_size == 0)
     {
         DEBUG_MORSE("%s: Invalid morse decode input\r\n", __FUNCTION__);
-        return 1;
+        return -1;
     }
     for (unsigned char i = 0; i < input_size; i++)
     {
@@ -187,10 +187,12 @@ char morse_decode_character(char* input, size_t input_size)
     if (current_position == NULL)
     {
         DEBUG_MORSE("%s: Morse point to no where\r\n", __FUNCTION__);
+        //return -1;
     }
     else
     {
         ret_val = current_position->data;
+        DEBUG_MORSE("%s: Data:%c\r\n", __FUNCTION__, ret_val);
     }
     return ret_val;
 }
@@ -205,7 +207,7 @@ void morse_clean(void)
 {
     bt_delete_tree(m_root);
     m_root = NULL;
-    DEBUG_MORSE("Create tree done\r\n");
+    DEBUG_MORSE("Release morse tree\r\n");
 }
 
 

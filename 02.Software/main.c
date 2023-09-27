@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "file_handle.h"
 #include "morse_operation.h"
@@ -21,6 +22,7 @@ static void encode(char* input_string, char *output_file, size_t string_len)
     /*In case of encoding -> output length is bigger than the original ->about 6 time bigger*/
     for (unsigned int i = 0; i < string_len; i++)
     {
+        input_string[i] = toupper(input_string[i]);
         if (input_string[i] >= 65 && input_string[i] <= 90) /*Upper letter case*/
         {
             printf("%c\r\n", input_string[i]);
@@ -29,10 +31,14 @@ static void encode(char* input_string, char *output_file, size_t string_len)
         }
         else if (input_string[i] == ' ') /*Space case*/
         {
-            len += sprintf(rd_buf + len, "%s", "   ");
+            len += sprintf(rd_buf + len, "%s", " / ");
+        }
+        else
+        {
+            printf("Character with hex value: 0x%02x - index: %d is not a value of Morse code uppercase Alphabet \r\n-> Please correct the input\r\n", input_string[i], i);
+            exit(0);
         }
     }
-    printf("DEbug RD_BUF: %s\r\n", rd_buf);
     file_handle_write(output_file, rd_buf);
     free(rd_buf);
 }
@@ -54,48 +60,57 @@ static void decode(char* input_string, char* output_file, size_t string_len)
     
     bool is_space_between_letter = false;
     bool is_space_between_words = false;
-    //printf("File decode function\r\n");
+    //bool is_end_of_string = false;
     memset(temp_buf, 0, sizeof(temp_buf));
     /*Find the space*/
     for (unsigned int i = 0; i < string_len; i++)
     {
-        temp_buf[temp_index++] = input_string[i];
-
         if (input_string[i] == ' ') /*Detect space*/
         {
-            for (unsigned int j = i + MORSE_SPACE_LENGTH_BETWEEN_LETTERS; j < i + MORSE_SPACE_LENGTH_BETWEEN_WORDS; j++)
-            {
-                if (input_string[i] == 0)
-                {
-                    /*end*/
-                    return;
-                }
-                else if (input_string[j] != ' ')
-                {
-                    is_space_between_letter = true;
-                    break;
-                }
-            }
-            if (is_space_between_letter == false)
+            if (i + 2 < string_len && input_string[i + 1] == '/' && input_string[i + 2] == ' ')
             {
                 is_space_between_words = true;
-                i = i + MORSE_SPACE_LENGTH_BETWEEN_WORDS;
+                i = i + 2;
+            }
+            else
+            {
+                is_space_between_letter = true;
+            }
+        }
+        else
+        {
+            temp_buf[temp_index++] = input_string[i];
+            if(i == string_len - 1)
+            {
+                is_space_between_letter = true;
             }
         }
         if (is_space_between_words || is_space_between_letter)
         {
+            printf("buffer :%s\r\n", temp_buf);
             char a = morse_decode_character(temp_buf, temp_index);
+            if(a == -1)
+            {
+                printf("Cannot decode the value -> Input is not a Encoded Morse code");
+                exit(0);
+            }
+            else
+            {
+                printf("Decode character: %c\r\n", a);
+            }
             temp_index = 0;
             memset(temp_buf, 0, sizeof(temp_buf));
             len += sprintf(rd_buf + len, "%c", a);
+            printf("rd buff:%s\r\n", rd_buf);
             if(is_space_between_words)
             {
-                len = sprintf(rd_buf + len, " ");
+                len += sprintf(rd_buf + len, " ");
             }
-            is_space_between_words = 0;
-            is_space_between_letter = 0;
+            is_space_between_words = false;
+            is_space_between_letter = false;
         }
     }
+    
     file_handle_write(output_file, rd_buf);
     free(rd_buf);
 }

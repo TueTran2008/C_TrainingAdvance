@@ -16,7 +16,7 @@ typedef enum
 }morse_operation_t;
 
 
-#define DEBUG_MORSE_ENABLE 0
+#define DEBUG_MORSE_ENABLE 1
 #define MORSE_SPACE_LENGTH_BETWEEN_LETTERS  1
 #define MORSE_SPACE_LENGTH_BETWEEN_WORDS    7
 /******************************************************************************
@@ -27,7 +27,8 @@ typedef enum
  *
  * @param[in] input Pointer to a buffer where the contents of the file will be stored.
  * @param[in] input_size Size of the input morse code string.
- * @return Charater value after decoded in ASCII.
+ * @return Charater value after decoded in ASCII. 
+ *         Return - 1 if cannot find the value
  */
 char morse_decode_character(char* input, size_t input_size);
 /**
