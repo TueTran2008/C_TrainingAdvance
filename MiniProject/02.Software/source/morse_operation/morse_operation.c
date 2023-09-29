@@ -27,6 +27,7 @@ typedef struct morse_code
 ******************************************************************************/
 static bt_node* m_root = NULL;
 static morse_encoded_string_t m_encode_string;
+static size_t longest_morse_len = 0;
 /******************************************************************************
  *                              FORWARD DECLERATIONS
 ******************************************************************************/
@@ -53,6 +54,11 @@ static size_t morse_encode_character(char key, char *p_out);
 static void insert_morse_node(bt_node* root, char character, const char* morse_code)
 {
     bt_node* current = root;
+    int len = strlen(morse_code);
+    if(len > longest_morse_len)
+    {
+        longest_morse_len = len; /*Know the deepest node*/
+    }
     for (int i = 0; i < strlen(morse_code); i++) {
         if (morse_code[i] == '.') {
             if (current->left == NULL) {
@@ -189,6 +195,11 @@ static char morse_decode_character(char* input, size_t input_size)
         DEBUG_MORSE("%s: Invalid morse decode input\r\n", __FUNCTION__);
         return -1;
     }
+    if(input_size > longest_morse_len)
+    {
+        printf("%s: Input Morse Character longer than deepest Morse tree node\r\n", __FUNCTION__);
+        return -1;
+    }
     for (unsigned char i = 0; i < input_size; i++)
     {
         if(input[i] == '.')
@@ -212,7 +223,9 @@ static char morse_decode_character(char* input, size_t input_size)
     }
     return ret_val;
 }
-
+/******************************************************************************
+ *                              GLOBAL FUNCTIONS
+******************************************************************************/
 int morse_encode(char* input_string, char *p_out, size_t string_len)
 {
     char *rd_buf = (char*)malloc(string_len * 6);
@@ -244,7 +257,7 @@ int morse_decode(char* input_string, char* p_out, size_t string_len)
 {
     /*In case of decoding -> output length is smaller than the orignial ->*/
     char *rd_buf = (char*)malloc(string_len);
-    char temp_buf[8];
+    char temp_buf[20];
     char temp_index = 0;
     int len = 0;
     bool is_space_between_letter = false;
@@ -256,7 +269,7 @@ int morse_decode(char* input_string, char* p_out, size_t string_len)
     {
         if (input_string[i] == ' ') /*Detect space*/
         {
-            if (i + 2 < string_len && input_string[i + 1] == '/' && input_string[i + 2] == ' ')
+            if (i + 2 < string_len && (input_string[i + 1] == '/' || input_string[i + 1] == ' ') && input_string[i + 2] == ' ')
             {
                 is_space_between_words = true;
                 i = i + 2;
@@ -293,7 +306,6 @@ int morse_decode(char* input_string, char* p_out, size_t string_len)
             is_space_between_letter = false;
         }
     }
-    //file_handle_write(output_file, rd_buf);
     strcpy(p_out, rd_buf);
     free(rd_buf);
     return 0;

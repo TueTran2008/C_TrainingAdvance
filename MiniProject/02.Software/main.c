@@ -74,6 +74,7 @@ int main(int argc, char *argv[])
             printf("Error when decode\r\n");
             return 0;
         }
+        file_handle_write(argv[3], buf_out);
     }
     if(err)
     {
