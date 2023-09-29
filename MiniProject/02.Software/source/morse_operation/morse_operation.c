@@ -187,17 +187,17 @@ static char morse_decode_character(char* input, size_t input_size)
 
     if (m_root == NULL)
     {
-        DEBUG_MORSE("%s: Morse operation hasn't initialized yet\r\n", __FUNCTION__);
+        printf("%s.c - line %d: Morse operation hasn't initialized yet\r\n", __FUNCTION__, __LINE__);
         return -1;
     }
     if (input == NULL || input_size == 0)
     {
-        DEBUG_MORSE("%s: Invalid morse decode input\r\n", __FUNCTION__);
+        printf("%s.c - line %d: Invalid morse decode input\r\n", __FUNCTION__, __LINE__);
         return -1;
     }
     if(input_size > longest_morse_len)
     {
-        printf("%s: Input Morse Character longer than deepest Morse tree node\r\n", __FUNCTION__);
+        printf("%s.c - line %d: Input morse character longer than deepest morse tree node\r\n", __FUNCTION__, __LINE__);
         return -1;
     }
     for (unsigned char i = 0; i < input_size; i++)
