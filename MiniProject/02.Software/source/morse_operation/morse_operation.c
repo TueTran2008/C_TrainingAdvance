@@ -5,6 +5,8 @@
 #include "binary_tree.h"
 #include <string.h>
 #include <stdbool.h>
+#include <stdlib.h>
+#include <ctype.h>
 /******************************************************************************
  *                              DEFINE AND TYPEDEF 
 ******************************************************************************/
@@ -31,6 +33,8 @@ static morse_encoded_string_t m_encode_string;
 static void insert_morse_node(bt_node* root, char character, const char* morse_code);
 static void create_morse_tree(void);
 static bt_node* search_character(bt_node *current, char key);
+static char morse_decode_character(char* input, size_t input_size);
+static size_t morse_encode_character(char key, char *p_out);
 /******************************************************************************
  *                              GLOBAL VARIALBE
 ******************************************************************************/
@@ -132,8 +136,13 @@ static bt_node* search_character(bt_node *current, char key)
     /*Cannot find the approriate character in this branch*/
     return NULL;
 }
-
-size_t morse_encode_character(char key, char *p_out)
+/**
+ * @brief Convert a character to a string of morse code.
+ *
+ * @param[in] key Input key value in character.
+ * @param[in] p_out Pointer to the encoded string output.
+ */
+static size_t morse_encode_character(char key, char *p_out)
 {
     size_t size = 0;
     bt_node *current_node = m_root;
@@ -157,8 +166,15 @@ size_t morse_encode_character(char key, char *p_out)
     memset(m_encode_string.letter, 0, sizeof(m_encode_string.letter));
     return size;
 }
-
-char morse_decode_character(char* input, size_t input_size)
+/**
+ * @brief Decode a string of mose code to character
+ *
+ * @param[in] input_string Pointer to data to be converte
+ * @param[in] input_size Pointer to input string size
+ * @return 1 if decode fail
+ *         0 if decode successfully
+ */
+static char morse_decode_character(char* input, size_t input_size)
 {
     char ret_val = 0;
     bt_node *current_position = m_root;
@@ -197,6 +213,91 @@ char morse_decode_character(char* input, size_t input_size)
     return ret_val;
 }
 
+int morse_encode(char* input_string, char *p_out, size_t string_len)
+{
+    char *rd_buf = (char*)malloc(string_len * 6);
+    int len = 0;
+    /*In case of encoding -> output length is bigger than the original ->about 6 time bigger*/
+    for (unsigned int i = 0; i < string_len; i++)
+    {
+        input_string[i] = toupper(input_string[i]);
+        if (input_string[i] >= 65 && input_string[i] <= 90) /*Upper letter case*/
+        {
+            len += morse_encode_character(input_string[i], rd_buf + len);
+            len += sprintf(rd_buf + len, "%s", " "); /*Add a space between letter*/
+        }
+        else if (input_string[i] == ' ') /*Space case*/
+        {
+            len += sprintf(rd_buf + len, "%s", " / ");
+        }
+        else
+        {
+            printf("Character with hex value: 0x%02x - index: %d is not a value of Morse code uppercase Alphabet \r\n-> Please correct the input\r\n", input_string[i], i);
+            return 1;
+        }
+    }
+    strcpy(p_out, rd_buf);
+    free(rd_buf);
+    return 0;
+}
+int morse_decode(char* input_string, char* p_out, size_t string_len)
+{
+    /*In case of decoding -> output length is smaller than the orignial ->*/
+    char *rd_buf = (char*)malloc(string_len);
+    char temp_buf[8];
+    char temp_index = 0;
+    int len = 0;
+    bool is_space_between_letter = false;
+    bool is_space_between_words = false;
+
+    memset(temp_buf, 0, sizeof(temp_buf));
+    /*Find the space*/
+    for (unsigned int i = 0; i < string_len; i++)
+    {
+        if (input_string[i] == ' ') /*Detect space*/
+        {
+            if (i + 2 < string_len && input_string[i + 1] == '/' && input_string[i + 2] == ' ')
+            {
+                is_space_between_words = true;
+                i = i + 2;
+            }
+            else
+            {
+                is_space_between_letter = true;
+            }
+        }
+        else
+        {
+            temp_buf[temp_index++] = input_string[i];
+            if(i == string_len - 1)
+            {
+                is_space_between_letter = true;
+            }
+        }
+        if (is_space_between_words || is_space_between_letter)
+        {
+            char a = morse_decode_character(temp_buf, temp_index);
+            if(a == -1)
+            {
+                printf("Cannot decode the value -> Input is not a Encoded Morse code");
+                return 1;
+            }
+            temp_index = 0;
+            memset(temp_buf, 0, sizeof(temp_buf));
+            len += sprintf(rd_buf + len, "%c", a);
+            if(is_space_between_words)
+            {
+                len += sprintf(rd_buf + len, " ");
+            }
+            is_space_between_words = false;
+            is_space_between_letter = false;
+        }
+    }
+    //file_handle_write(output_file, rd_buf);
+    strcpy(p_out, rd_buf);
+    free(rd_buf);
+    return 0;
+}
 void morse_init(void)
 {
     create_morse_tree();

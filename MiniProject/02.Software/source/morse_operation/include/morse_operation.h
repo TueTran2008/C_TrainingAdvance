@@ -22,22 +22,27 @@ typedef enum
 /******************************************************************************
  *                              GLOBAL FUNCTIONS
 ******************************************************************************/
+
 /**
- * @brief Reads the contents of a file into a string.
+ * @brief Encode a text string to Morse code and write to a file
  *
- * @param[in] input Pointer to a buffer where the contents of the file will be stored.
- * @param[in] input_size Size of the input morse code string.
- * @return Charater value after decoded in ASCII. 
- *         Return - 1 if cannot find the value
+ * @param[in] input_string Pointer to data to be converte
+ * @param[in] p_out Pointer to buffer holds encoded data
+ * @param[in] string_len length of input text to be convert
+ * @return 1 if encode fail
+ *         0 if encode sucessfully
  */
-char morse_decode_character(char* input, size_t input_size);
+int morse_encode(char* input_string, char *p_out, size_t string_len);
 /**
- * @brief Convert a character to a string of morse code.
+ * @brief Decode a text string to Morse code and write to a file
  *
- * @param[in] key Input key value in character.
- * @param[in] p_out Pointer to the encoded string output.
+ * @param[in] input_string Pointer to data to be converte
+ * @param[in] p_out Pointer to buffer holds encoded data
+ * @param[in] string_len length of input text to be convert
+ * @return 1 if decode fail
+ *         0 if decode successfully
  */
-size_t morse_encode_character(char key, char* p_out);
+int morse_decode(char* input_string, char* p_out, size_t string_len);
 /**
  * @brief Create the morse binary tree
  */
